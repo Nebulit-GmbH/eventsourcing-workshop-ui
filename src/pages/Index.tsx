@@ -1,13 +1,49 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { Layout } from '@/components/layout/Layout';
+import { CatalogList } from '@/components/catalog/CatalogList';
+import { StatusTabs } from '@/components/catalog/StatusTabs';
+import { useCatalogStore } from '@/store/catalogStore';
 
 const Index = () => {
+  const [statusFilter, setStatusFilter] = useState('all');
+  const entries = useCatalogStore((state) => state.entries);
+
+  const filteredEntries = entries.filter((entry) => {
+    if (statusFilter === 'all') return true;
+    return entry.status === statusFilter;
+  });
+
+  const counts = {
+    all: entries.length,
+    draft: entries.filter((e) => e.status === 'draft').length,
+    published: entries.filter((e) => e.status === 'published').length,
+    archived: entries.filter((e) => e.status === 'archived').length,
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <Layout>
+      <div className="space-y-8">
+        <div className="flex flex-col gap-2">
+          <h1 className="font-serif text-3xl font-bold text-foreground">
+            Catalog Entries
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your catalog entries, publish content, and track status
+          </p>
+        </div>
+
+        <StatusTabs value={statusFilter} onChange={setStatusFilter} counts={counts} />
+
+        <CatalogList
+          entries={filteredEntries}
+          emptyMessage={
+            statusFilter === 'all'
+              ? 'No catalog entries yet'
+              : `No ${statusFilter} entries`
+          }
+        />
       </div>
-    </div>
+    </Layout>
   );
 };
 
