@@ -12,6 +12,10 @@ import BooksForRent from "./pages/BooksForRent";
 import Reservations from "./pages/Reservations";
 import ActiveReservations from "./pages/ActiveReservations";
 import CustomerBorrowings from "./pages/CustomerBorrowings";
+import Auth from "./pages/Auth";
+import ConfirmAccount from "./pages/ConfirmAccount";
+import Account from "./pages/Account";
+import ConfirmedAccounts from "./pages/ConfirmedAccounts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +39,12 @@ const App = () => (
           <Route path="/reservations" element={<Reservations />} />
           <Route path="/active" element={<ActiveReservations />} />
           <Route path="/borrowings" element={<CustomerBorrowings />} />
+          
+          {/* Registration Context */}
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/confirm/:userId" element={<ConfirmAccount />} />
+          <Route path="/account" element={<Account />} />
+          <Route path="/accounts" element={<ConfirmedAccounts />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
