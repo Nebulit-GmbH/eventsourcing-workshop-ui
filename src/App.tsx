@@ -8,6 +8,10 @@ import CreateEntry from "./pages/CreateEntry";
 import EntryDetails from "./pages/EntryDetails";
 import EditEntry from "./pages/EditEntry";
 import Publishing from "./pages/Publishing";
+import BooksForRent from "./pages/BooksForRent";
+import Reservations from "./pages/Reservations";
+import ActiveReservations from "./pages/ActiveReservations";
+import CustomerBorrowings from "./pages/CustomerBorrowings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,11 +23,19 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Catalog Context */}
           <Route path="/" element={<Index />} />
           <Route path="/create" element={<CreateEntry />} />
           <Route path="/entry/:id" element={<EntryDetails />} />
           <Route path="/entry/:id/edit" element={<EditEntry />} />
           <Route path="/publish" element={<Publishing />} />
+          
+          {/* Borrowing Context */}
+          <Route path="/books" element={<BooksForRent />} />
+          <Route path="/reservations" element={<Reservations />} />
+          <Route path="/active" element={<ActiveReservations />} />
+          <Route path="/borrowings" element={<CustomerBorrowings />} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
