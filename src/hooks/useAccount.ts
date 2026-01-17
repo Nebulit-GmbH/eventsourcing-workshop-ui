@@ -97,7 +97,7 @@ export function useAccountActions() {
   };
 
   const notifyCustomer = async (userId: string, email: string, name: string) => {
-    const token = Math.random().toString(36).substr(2, 8).toUpperCase();
+    const token = crypto.randomUUID().split('-')[0].toUpperCase();
     await accountApi.notifyCustomer(userId, {
       userId,
       email,
