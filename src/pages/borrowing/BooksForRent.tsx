@@ -2,24 +2,23 @@ import { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { BookCard } from '@/components/borrowing/BookCard';
 import { UserSelector } from '@/components/borrowing/UserSelector';
-import { useBooksForRent, useBorrowingActions, borrowingKeys, useActiveReservations } from '@/hooks/useBorrowing';
+import { useBooksForRent, useBorrowingActions, useActiveReservations } from '@/hooks/useBorrowing';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { BookOpen } from 'lucide-react';
 import { useNotificationAll } from "@/hooks/useNotification.tsx";
-import { useQueryClient } from '@tanstack/react-query';
 
 export default function BooksForRent() {
-  const queryClient = useQueryClient();
   const { currentUser } = useAuth();
-  const { data: booksData, isLoading } = useBooksForRent();
-  const { data: activeReservations } = useActiveReservations();
+  const { data: booksData, isLoading, refetch: refetchBooks } = useBooksForRent();
+  const { data: activeReservations, refetch: refetchReservations } = useActiveReservations();
   const { reserveBook } = useBorrowingActions();
   const [reservingBookId, setReservingBookId] = useState<string | null>(null);
 
   // Refetch on notification
   useNotificationAll(() => {
-    queryClient.invalidateQueries({ queryKey: borrowingKeys.all });
+    refetchBooks();
+    refetchReservations();
   });
 
   // Get reserved book IDs
@@ -42,6 +41,8 @@ export default function BooksForRent() {
     try {
       await reserveBook(bookId, currentUser.userId);
       toast.success(`Reserved "${title}" for ${currentUser.name}`);
+      refetchBooks();
+      refetchReservations();
     } catch (error) {
       toast.error('Failed to reserve book');
     } finally {

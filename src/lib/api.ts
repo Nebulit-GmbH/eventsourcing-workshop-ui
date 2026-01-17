@@ -126,6 +126,16 @@ export interface ConnectionStatus {
   activeConnections: number;
 }
 
+// Type aliases for hooks
+export type CatalogEntry = { itemId: string; title: string; author?: string; description?: string };
+export type ConfirmedAccount = { user_id: string; email: string; name: string };
+export type ConfirmationMailToSend = { userId: string; email: string; name: string; notificationSent: string };
+export type EmailToConfirm = { userId: string; email: string; token: string };
+export type ActiveReservation = { bookId: string; reservationId: string; userId: string };
+export type ReservationDetails = { bookId: string; userId: string };
+export type CustomerBorrowing = { reservationId: string; userId: string };
+export type BookForRent = { bookId: string; title: string; description: string };
+
 export interface CatalogEntriesReadModel {
   data: Array<{
     itemId: string;

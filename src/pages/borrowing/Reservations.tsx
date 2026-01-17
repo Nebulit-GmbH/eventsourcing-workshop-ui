@@ -1,20 +1,18 @@
 import { Layout } from '@/components/layout/Layout';
 import { ReservationCard } from '@/components/borrowing/ReservationCard';
-import { useActiveReservations, borrowingKeys } from '@/hooks/useBorrowing';
+import { useActiveReservations } from '@/hooks/useBorrowing';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CalendarClock, BookOpen, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useNotificationAll } from "@/hooks/useNotification.tsx";
-import { useQueryClient } from '@tanstack/react-query';
 import { Reservation } from '@/types/borrowing';
 
 export default function Reservations() {
-  const queryClient = useQueryClient();
-  const { data: reservationsData, isLoading } = useActiveReservations();
+  const { data: reservationsData, isLoading, refetch } = useActiveReservations();
 
   // Refetch on notification
   useNotificationAll(() => {
-    queryClient.invalidateQueries({ queryKey: borrowingKeys.all });
+    refetch();
   });
 
   // Transform API data to Reservation format

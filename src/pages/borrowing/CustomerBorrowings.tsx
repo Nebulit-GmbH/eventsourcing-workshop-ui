@@ -2,23 +2,21 @@ import { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { ReservationCard } from '@/components/borrowing/ReservationCard';
 import { UserSelector } from '@/components/borrowing/UserSelector';
-import { useCustomerBorrowings, useBorrowingActions, borrowingKeys } from '@/hooks/useBorrowing';
+import { useCustomerBorrowings, useBorrowingActions } from '@/hooks/useBorrowing';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { BookOpen } from 'lucide-react';
 import { useNotificationAll } from "@/hooks/useNotification.tsx";
-import { useQueryClient } from '@tanstack/react-query';
 import { Reservation } from '@/types/borrowing';
 
 export default function CustomerBorrowings() {
-  const queryClient = useQueryClient();
   const { currentUser } = useAuth();
-  const { data: borrowingsData, isLoading } = useCustomerBorrowings();
+  const { data: borrowingsData, isLoading, refetch } = useCustomerBorrowings();
   const { markLost, markDamaged } = useBorrowingActions();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   useNotificationAll(() => {
-    queryClient.invalidateQueries({ queryKey: borrowingKeys.all });
+    refetch();
   });
 
   const borrowings: Reservation[] = (borrowingsData || [])
@@ -41,6 +39,7 @@ export default function CustomerBorrowings() {
     try {
       await markLost(reservationId, bookId, currentUser.userId);
       toast.error('Book marked as lost');
+      refetch();
     } catch (error) {
       toast.error('Failed to mark as lost');
     } finally {
@@ -57,6 +56,7 @@ export default function CustomerBorrowings() {
     try {
       await markDamaged(reservationId, bookId, currentUser.userId);
       toast.warning('Book marked as damaged');
+      refetch();
     } catch (error) {
       toast.error('Failed to mark as damaged');
     } finally {

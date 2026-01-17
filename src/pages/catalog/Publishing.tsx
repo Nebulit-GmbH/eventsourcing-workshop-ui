@@ -1,19 +1,17 @@
 import { Layout } from '@/components/layout/Layout';
 import { CatalogList } from '@/components/catalog/CatalogList';
-import { useCatalogEntries, catalogKeys } from '@/hooks/useCatalog';
+import { useCatalogEntries } from '@/hooks/useCatalog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, CheckCircle } from 'lucide-react';
 import { useNotificationAll } from "@/hooks/useNotification.tsx";
-import { useQueryClient } from '@tanstack/react-query';
 import { CatalogEntry } from '@/types/catalog';
 
 const Publishing = () => {
-  const queryClient = useQueryClient();
-  const { data: entriesData, isLoading } = useCatalogEntries();
+  const { data: entriesData, isLoading, refetch } = useCatalogEntries();
 
   // Refetch on notification
   useNotificationAll(() => {
-    queryClient.invalidateQueries({ queryKey: catalogKeys.entries() });
+    refetch();
   });
 
   // Transform API data to CatalogEntry format
