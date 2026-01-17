@@ -1,23 +1,21 @@
 import { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { ReservationCard } from '@/components/borrowing/ReservationCard';
-import { useActiveReservations, useBorrowingActions, borrowingKeys } from '@/hooks/useBorrowing';
+import { useActiveReservations, useBorrowingActions } from '@/hooks/useBorrowing';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Clock } from 'lucide-react';
 import { useNotificationAll } from "@/hooks/useNotification.tsx";
-import { useQueryClient } from '@tanstack/react-query';
 import { Reservation } from '@/types/borrowing';
 
 export default function ActiveReservations() {
-  const queryClient = useQueryClient();
   const { currentUser } = useAuth();
-  const { data: reservationsData, isLoading } = useActiveReservations();
+  const { data: reservationsData, isLoading, refetch } = useActiveReservations();
   const { markPickedUp } = useBorrowingActions();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   useNotificationAll(() => {
-    queryClient.invalidateQueries({ queryKey: borrowingKeys.all });
+    refetch();
   });
 
   const activeReservations: Reservation[] = (reservationsData || []).map(r => ({
@@ -38,6 +36,7 @@ export default function ActiveReservations() {
     try {
       await markPickedUp(reservationId, currentUser.userId);
       toast.success('Reservation marked as picked up');
+      refetch();
     } catch (error) {
       toast.error('Failed to mark as picked up');
     } finally {

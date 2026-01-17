@@ -1,7 +1,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import CreateEntry from "./pages/catalog/CreateEntry";
@@ -21,8 +20,6 @@ import { NotificationProvider, useNotificationAll } from "./hooks/useNotificatio
 import { AuthProvider } from "./hooks/useAuth";
 import { toast } from "sonner";
 
-const queryClient = new QueryClient();
-
 function NotificationToaster() {
   useNotificationAll((event) => {
     console.log('Received notification:', event);
@@ -35,41 +32,39 @@ function NotificationToaster() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <NotificationProvider>
-          <NotificationToaster />
-          <Routes>
-            {/* Catalog Context */}
-            <Route path="/" element={<Index />} />
-            <Route path="/create" element={<CreateEntry />} />
-            <Route path="/entry/:id" element={<EntryDetails />} />
-            <Route path="/entry/:id/edit" element={<EditEntry />} />
-            <Route path="/publish" element={<Publishing />} />
+  <AuthProvider>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <NotificationProvider>
+        <NotificationToaster />
+        <Routes>
+          {/* Catalog Context */}
+          <Route path="/" element={<Index />} />
+          <Route path="/create" element={<CreateEntry />} />
+          <Route path="/entry/:id" element={<EntryDetails />} />
+          <Route path="/entry/:id/edit" element={<EditEntry />} />
+          <Route path="/publish" element={<Publishing />} />
 
-            {/* Borrowing Context */}
-            <Route path="/books" element={<BooksForRent />} />
-            <Route path="/reservations" element={<Reservations />} />
-            <Route path="/active" element={<ActiveReservations />} />
-            <Route path="/borrowings" element={<CustomerBorrowings />} />
+          {/* Borrowing Context */}
+          <Route path="/books" element={<BooksForRent />} />
+          <Route path="/reservations" element={<Reservations />} />
+          <Route path="/active" element={<ActiveReservations />} />
+          <Route path="/borrowings" element={<CustomerBorrowings />} />
 
-            {/* Registration Context */}
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/confirm/:userId" element={<ConfirmAccount />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/accounts" element={<ConfirmedAccounts />} />
+          {/* Registration Context */}
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/confirm/:userId" element={<ConfirmAccount />} />
+          <Route path="/account" element={<Account />} />
+          <Route path="/accounts" element={<ConfirmedAccounts />} />
 
-            <Route path="*" element={<NotFound />} />
-            </Routes>
-          </NotificationProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+          <Route path="*" element={<NotFound />} />
+          </Routes>
+        </NotificationProvider>
+      </BrowserRouter>
+    </TooltipProvider>
+  </AuthProvider>
 );
 
 export default App;

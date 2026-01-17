@@ -4,18 +4,15 @@ import { CatalogList } from '@/components/catalog/CatalogList';
 import { StatusTabs } from '@/components/catalog/StatusTabs';
 import { useCatalogEntries } from '@/hooks/useCatalog';
 import { useNotificationAll } from "@/hooks/useNotification.tsx";
-import { useQueryClient } from '@tanstack/react-query';
-import { catalogKeys } from '@/hooks/useCatalog';
 import { CatalogEntry } from '@/types/catalog';
 
 const Index = () => {
   const [statusFilter, setStatusFilter] = useState('all');
-  const queryClient = useQueryClient();
-  const { data: entriesData, isLoading } = useCatalogEntries();
+  const { data: entriesData, isLoading, refetch } = useCatalogEntries();
 
   // Refetch on notification
   useNotificationAll(() => {
-    queryClient.invalidateQueries({ queryKey: catalogKeys.entries() });
+    refetch();
   });
 
   // Transform API data to CatalogEntry format
