@@ -18,6 +18,7 @@ import Account from "./pages/account/Account";
 import ConfirmedAccounts from "./pages/account/ConfirmedAccounts";
 import NotFound from "./pages/NotFound";
 import { NotificationProvider, useNotificationAll } from "./hooks/useNotification";
+import { AuthProvider } from "./hooks/useAuth";
 import { toast } from "sonner";
 
 const queryClient = new QueryClient();
@@ -35,11 +36,12 @@ function NotificationToaster() {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <NotificationProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <NotificationProvider>
           <NotificationToaster />
           <Routes>
             {/* Catalog Context */}
@@ -62,10 +64,11 @@ const App = () => (
             <Route path="/accounts" element={<ConfirmedAccounts />} />
 
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </NotificationProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+            </Routes>
+          </NotificationProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

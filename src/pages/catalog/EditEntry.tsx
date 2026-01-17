@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { CatalogForm } from '@/components/catalog/CatalogForm';
-import { useCatalogStore } from '@/store/catalogStore';
+import { useCatalogEntry, useCatalogActions } from '@/hooks/useCatalog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -11,11 +11,19 @@ import { toast } from 'sonner';
 const EditEntry = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const getEntry = useCatalogStore((state) => state.getEntry);
-  const updateEntry = useCatalogStore((state) => state.updateEntry);
+  const { data: entry, isLoading } = useCatalogEntry(id);
+  const { updateEntry } = useCatalogActions();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const entry = id ? getEntry(id) : undefined;
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center py-16">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!entry) {
     return (
@@ -36,7 +44,7 @@ const EditEntry = () => {
   const handleSubmit = async (data: { title: string; author: string; description: string }) => {
     setIsSubmitting(true);
     try {
-      updateEntry(entry.itemId, data);
+      await updateEntry(entry.itemId, data);
       toast.success('Entry updated successfully');
       navigate(`/entry/${entry.itemId}`);
     } catch (error) {
@@ -67,7 +75,15 @@ const EditEntry = () => {
           </CardHeader>
           <CardContent>
             <CatalogForm
-              entry={entry}
+              entry={{
+                itemId: entry.itemId,
+                title: entry.title,
+                author: entry.author,
+                description: entry.description,
+                status: 'draft',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              }}
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
             />

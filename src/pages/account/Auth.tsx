@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useRegistrationStore } from '@/store/registrationStore';
+import { useAuth } from '@/hooks/useAuth';
+import { useAccountActions, useConfirmedAccounts } from '@/hooks/useAccount';
 import { toast } from 'sonner';
 import { UserPlus, LogIn, AlertCircle } from 'lucide-react';
 import { z } from 'zod';
@@ -22,63 +23,76 @@ const loginSchema = z.object({
 
 export default function Auth() {
   const navigate = useNavigate();
-  const { createAccount, notifyCustomer, login, isLoggedIn } = useRegistrationStore();
-  
+  const { isLoggedIn, login } = useAuth();
+  const { createAccount, notifyCustomer } = useAccountActions();
+  const { data: confirmedAccounts } = useConfirmedAccounts();
+
   const [signupEmail, setSignupEmail] = useState('');
   const [signupName, setSignupName] = useState('');
   const [signupError, setSignupError] = useState('');
-  
+  const [isSigningUp, setIsSigningUp] = useState(false);
+
   const [loginEmail, setLoginEmail] = useState('');
   const [loginError, setLoginError] = useState('');
 
-  // Redirect if already logged in
-  if (isLoggedIn()) {
+  if (isLoggedIn) {
     navigate('/');
     return null;
   }
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setSignupError('');
-    
+
     const validation = signupSchema.safeParse({ email: signupEmail, name: signupName });
     if (!validation.success) {
       setSignupError(validation.error.errors[0].message);
       return;
     }
 
-    const result = createAccount(signupEmail, signupName);
-    
-    if (result.success && result.account) {
-      // Automatically send notification (mock)
-      notifyCustomer(result.account.userId);
+    setIsSigningUp(true);
+    try {
+      const result = await createAccount(signupEmail, signupName);
+      await notifyCustomer(result.userId, result.email, result.name);
+
       toast.success('Account created! Check your email for confirmation.', {
         description: `A confirmation token has been sent to ${signupEmail}`,
       });
-      navigate(`/confirm/${result.account.userId}`);
-    } else {
-      setSignupError(result.error || 'Failed to create account');
+      navigate(`/confirm/${result.userId}`);
+    } catch (error) {
+      setSignupError(error instanceof Error ? error.message : 'Failed to create account');
+    } finally {
+      setIsSigningUp(false);
     }
   };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
-    
+
     const validation = loginSchema.safeParse({ email: loginEmail });
     if (!validation.success) {
       setLoginError(validation.error.errors[0].message);
       return;
     }
 
-    const result = login(loginEmail);
-    
-    if (result.success) {
-      toast.success('Welcome back!');
-      navigate('/');
-    } else {
-      setLoginError(result.error || 'Login failed');
+    const account = confirmedAccounts?.find(
+      (a) => a.email.toLowerCase() === loginEmail.toLowerCase()
+    );
+
+    if (!account) {
+      setLoginError('No confirmed account found with this email');
+      return;
     }
+
+    login({
+      userId: account.user_id,
+      email: account.email,
+      name: account.name,
+    });
+
+    toast.success('Welcome back!');
+    navigate('/');
   };
 
   return (
@@ -132,7 +146,7 @@ export default function Auth() {
                       {signupError}
                     </div>
                   )}
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full" disabled={isSigningUp}>
                     Create Account
                   </Button>
                 </form>

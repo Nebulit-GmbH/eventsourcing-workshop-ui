@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useRegistrationStore } from '@/store/registrationStore';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const catalogNavItems = [
@@ -32,9 +32,7 @@ const registrationNavItems = [
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isLoggedIn, getCurrentAccount, logout } = useRegistrationStore();
-  
-  const currentAccount = getCurrentAccount();
+  const { isLoggedIn, currentUser, logout } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -133,7 +131,7 @@ export function Header() {
                     </DropdownMenuItem>
                   );
                 })}
-                {isLoggedIn() && (
+                {isLoggedIn && (
                   <DropdownMenuItem asChild>
                     <Link to="/account" className="flex items-center gap-2">
                       <User className="h-4 w-4" />
@@ -153,17 +151,17 @@ export function Header() {
               <span className="hidden sm:inline">New Entry</span>
             </Button>
           </Link>
-          
-          {isLoggedIn() ? (
+
+          {isLoggedIn ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" className="gap-2">
                   <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">{currentAccount?.name}</span>
+                  <span className="hidden sm:inline">{currentUser?.name}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{currentAccount?.email}</DropdownMenuLabel>
+                <DropdownMenuLabel>{currentUser?.email}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link to="/account" className="flex items-center gap-2">

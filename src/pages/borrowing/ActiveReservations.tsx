@@ -1,24 +1,49 @@
+import { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { ReservationCard } from '@/components/borrowing/ReservationCard';
-import { useBorrowingStore } from '@/store/borrowingStore';
+import { useActiveReservations, useBorrowingActions, borrowingKeys } from '@/hooks/useBorrowing';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Clock } from 'lucide-react';
-import {useNotificationAll} from "@/hooks/useNotification.tsx";
+import { useNotificationAll } from "@/hooks/useNotification.tsx";
+import { useQueryClient } from '@tanstack/react-query';
+import { Reservation } from '@/types/borrowing';
 
 export default function ActiveReservations() {
-  const { getAllReservations, markPickedUp, getCurrentUser } = useBorrowingStore();
-  const currentUser = getCurrentUser();
-  
-  const activeReservations = getAllReservations().filter((r) => r.status === 'active');
+  const queryClient = useQueryClient();
+  const { currentUser } = useAuth();
+  const { data: reservationsData, isLoading } = useActiveReservations();
+  const { markPickedUp } = useBorrowingActions();
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
-  const handlePickUp = (reservationId: string) => {
-    markPickedUp(reservationId, currentUser.userId);
-    toast.success('Reservation marked as picked up');
+  useNotificationAll(() => {
+    queryClient.invalidateQueries({ queryKey: borrowingKeys.all });
+  });
+
+  const activeReservations: Reservation[] = (reservationsData || []).map(r => ({
+    reservationId: r.reservationId,
+    bookId: r.bookId,
+    userId: r.userId,
+    status: 'active' as const,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }));
+
+  const handlePickUp = async (reservationId: string) => {
+    if (!currentUser) {
+      toast.error('Please login first');
+      return;
+    }
+    setProcessingId(reservationId);
+    try {
+      await markPickedUp(reservationId, currentUser.userId);
+      toast.success('Reservation marked as picked up');
+    } catch (error) {
+      toast.error('Failed to mark as picked up');
+    } finally {
+      setProcessingId(null);
+    }
   };
-
-  useNotificationAll(()=>{
-      // refresh
-  })
 
   return (
     <Layout>
@@ -32,7 +57,9 @@ export default function ActiveReservations() {
           </p>
         </div>
 
-        {activeReservations.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-8 text-muted-foreground">Loading...</div>
+        ) : activeReservations.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary mb-4">
               <Clock className="h-8 w-8 text-muted-foreground" />
@@ -51,7 +78,7 @@ export default function ActiveReservations() {
                 key={reservation.reservationId}
                 reservation={reservation}
                 showActions
-                onPickUp={() => handlePickUp(reservation.reservationId)}
+                onPickUp={processingId !== reservation.reservationId ? () => handlePickUp(reservation.reservationId) : undefined}
               />
             ))}
           </div>

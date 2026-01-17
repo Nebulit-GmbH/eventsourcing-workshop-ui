@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
-import { useCatalogStore } from '@/store/catalogStore';
+import { useCatalogEntry, useCatalogActions } from '@/hooks/useCatalog';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,11 +30,20 @@ const statusStyles = {
 const EntryDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const getEntry = useCatalogStore((state) => state.getEntry);
-  const archiveEntry = useCatalogStore((state) => state.archiveEntry);
-  const publishEntry = useCatalogStore((state) => state.publishEntry);
+  const { data: entry, isLoading } = useCatalogEntry(id);
+  const { archiveEntry, publishEntry } = useCatalogActions();
+  const [isArchiving, setIsArchiving] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
 
-  const entry = id ? getEntry(id) : undefined;
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center py-16">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!entry) {
     return (
@@ -51,15 +61,34 @@ const EntryDetails = () => {
     );
   }
 
-  const handlePublish = () => {
-    publishEntry(entry.itemId);
-    toast.success('Entry published successfully');
+  // Default status since API doesn't return it
+  const status = 'draft' as const;
+  const createdAt = new Date();
+  const updatedAt = new Date();
+
+  const handlePublish = async () => {
+    setIsPublishing(true);
+    try {
+      await publishEntry(entry.itemId);
+      toast.success('Entry published successfully');
+    } catch (error) {
+      toast.error('Failed to publish entry');
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
-  const handleArchive = () => {
-    archiveEntry(entry.itemId);
-    toast.success('Entry archived');
-    navigate('/');
+  const handleArchive = async () => {
+    setIsArchiving(true);
+    try {
+      await archiveEntry(entry.itemId);
+      toast.success('Entry archived');
+      navigate('/');
+    } catch (error) {
+      toast.error('Failed to archive entry');
+    } finally {
+      setIsArchiving(false);
+    }
   };
 
   return (
@@ -78,8 +107,8 @@ const EntryDetails = () => {
           <CardHeader className="pb-4 border-b border-border/50">
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-2">
-                <Badge className={cn('capitalize', statusStyles[entry.status])}>
-                  {entry.status}
+                <Badge className={cn('capitalize', statusStyles[status])}>
+                  {status}
                 </Badge>
                 <h1 className="font-serif text-3xl font-bold text-foreground">
                   {entry.title}
@@ -94,11 +123,11 @@ const EntryDetails = () => {
               </span>
               <span className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4" />
-                Created {format(new Date(entry.createdAt), 'MMM d, yyyy')}
+                Created {format(createdAt, 'MMM d, yyyy')}
               </span>
               <span className="flex items-center gap-1.5">
                 <Clock className="h-4 w-4" />
-                Updated {format(new Date(entry.updatedAt), 'MMM d, yyyy \'at\' h:mm a')}
+                Updated {format(updatedAt, 'MMM d, yyyy \'at\' h:mm a')}
               </span>
             </div>
           </CardHeader>
@@ -124,10 +153,9 @@ const EntryDetails = () => {
           </Link>
 
           <div className="flex items-center gap-3">
-            {entry.status !== 'archived' && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="gap-2 text-muted-foreground">
+                  <Button variant="outline" className="gap-2 text-muted-foreground" disabled={isArchiving}>
                     <Archive className="h-4 w-4" />
                     Archive
                   </Button>
@@ -147,10 +175,9 @@ const EntryDetails = () => {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            )}
 
-            {entry.status === 'draft' && (
-              <Button onClick={handlePublish} className="gap-2">
+            {status === 'draft' && (
+              <Button onClick={handlePublish} className="gap-2" disabled={isPublishing}>
                 <Send className="h-4 w-4" />
                 Publish
               </Button>

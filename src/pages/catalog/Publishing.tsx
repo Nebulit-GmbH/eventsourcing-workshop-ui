@@ -1,20 +1,35 @@
 import { Layout } from '@/components/layout/Layout';
 import { CatalogList } from '@/components/catalog/CatalogList';
-import { useCatalogStore } from '@/store/catalogStore';
+import { useCatalogEntries, catalogKeys } from '@/hooks/useCatalog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, CheckCircle } from 'lucide-react';
-import {useNotificationAll} from "@/hooks/useNotification.tsx";
+import { useNotificationAll } from "@/hooks/useNotification.tsx";
+import { useQueryClient } from '@tanstack/react-query';
+import { CatalogEntry } from '@/types/catalog';
 
 const Publishing = () => {
-  const getDraftEntries = useCatalogStore((state) => state.getDraftEntries);
-  const getPublishedEntries = useCatalogStore((state) => state.getPublishedEntries);
+  const queryClient = useQueryClient();
+  const { data: entriesData, isLoading } = useCatalogEntries();
 
-  const draftEntries = getDraftEntries();
-  const publishedEntries = getPublishedEntries();
+  // Refetch on notification
+  useNotificationAll(() => {
+    queryClient.invalidateQueries({ queryKey: catalogKeys.entries() });
+  });
 
-    useNotificationAll(()=>{
-        // refresh
-    })
+  // Transform API data to CatalogEntry format
+  const entries: CatalogEntry[] = (entriesData || []).map(item => ({
+    itemId: item.itemId,
+    title: item.title,
+    author: '',
+    description: '',
+    status: 'draft' as const,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }));
+
+  // Since API doesn't return status, we'll show all as draft for now
+  const draftEntries = entries;
+  const publishedEntries: CatalogEntry[] = [];
 
   return (
     <Layout>
@@ -47,10 +62,14 @@ const Publishing = () => {
           </TabsList>
 
           <TabsContent value="pending" className="mt-6">
-            <CatalogList
-              entries={draftEntries}
-              emptyMessage="No entries pending review"
-            />
+            {isLoading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading...</div>
+            ) : (
+              <CatalogList
+                entries={draftEntries}
+                emptyMessage="No entries pending review"
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="published" className="mt-6">

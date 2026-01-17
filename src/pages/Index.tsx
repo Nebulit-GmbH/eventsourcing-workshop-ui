@@ -2,12 +2,32 @@ import { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { CatalogList } from '@/components/catalog/CatalogList';
 import { StatusTabs } from '@/components/catalog/StatusTabs';
-import { useCatalogStore } from '@/store/catalogStore';
-import {useNotificationAll} from "@/hooks/useNotification.tsx";
+import { useCatalogEntries } from '@/hooks/useCatalog';
+import { useNotificationAll } from "@/hooks/useNotification.tsx";
+import { useQueryClient } from '@tanstack/react-query';
+import { catalogKeys } from '@/hooks/useCatalog';
+import { CatalogEntry } from '@/types/catalog';
 
 const Index = () => {
   const [statusFilter, setStatusFilter] = useState('all');
-  const entries = useCatalogStore((state) => state.entries);
+  const queryClient = useQueryClient();
+  const { data: entriesData, isLoading } = useCatalogEntries();
+
+  // Refetch on notification
+  useNotificationAll(() => {
+    queryClient.invalidateQueries({ queryKey: catalogKeys.entries() });
+  });
+
+  // Transform API data to CatalogEntry format
+  const entries: CatalogEntry[] = (entriesData || []).map(item => ({
+    itemId: item.itemId,
+    title: item.title,
+    author: '',
+    description: '',
+    status: 'draft' as const,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }));
 
   const filteredEntries = entries.filter((entry) => {
     if (statusFilter === 'all') return true;
@@ -35,14 +55,18 @@ const Index = () => {
 
         <StatusTabs value={statusFilter} onChange={setStatusFilter} counts={counts} />
 
-        <CatalogList
-          entries={filteredEntries}
-          emptyMessage={
-            statusFilter === 'all'
-              ? 'No catalog entries yet'
-              : `No ${statusFilter} entries`
-          }
-        />
+        {isLoading ? (
+          <div className="text-center py-8 text-muted-foreground">Loading...</div>
+        ) : (
+          <CatalogList
+            entries={filteredEntries}
+            emptyMessage={
+              statusFilter === 'all'
+                ? 'No catalog entries yet'
+                : `No ${statusFilter} entries`
+            }
+          />
+        )}
       </div>
     </Layout>
   );

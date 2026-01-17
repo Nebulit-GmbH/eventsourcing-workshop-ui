@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Reservation } from '@/types/borrowing';
-import { useCatalogStore } from '@/store/catalogStore';
-import { useBorrowingStore } from '@/store/borrowingStore';
+import { useCatalogEntry } from '@/hooks/useCatalog';
+import { useConfirmedAccounts } from '@/hooks/useAccount';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
@@ -24,18 +24,29 @@ const statusConfig = {
   damaged: { label: 'Damaged', icon: AlertTriangle, variant: 'outline' as const, color: 'text-amber-600' },
 };
 
-export function ReservationCard({ 
-  reservation, 
+// Mock users for fallback
+const MOCK_USERS = [
+  { userId: 'user-1', email: 'alice@example.com', name: 'Alice Johnson' },
+  { userId: 'user-2', email: 'bob@example.com', name: 'Bob Smith' },
+  { userId: 'user-3', email: 'carol@example.com', name: 'Carol Williams' },
+];
+
+export function ReservationCard({
+  reservation,
   showActions = false,
   onPickUp,
   onMarkLost,
-  onMarkDamaged 
+  onMarkDamaged
 }: ReservationCardProps) {
-  const getEntry = useCatalogStore((state) => state.getEntry);
-  const getUsers = useBorrowingStore((state) => state.getUsers);
-  
-  const book = getEntry(reservation.bookId);
-  const user = getUsers().find((u) => u.userId === reservation.userId);
+  const { data: book } = useCatalogEntry(reservation.bookId);
+  const { data: confirmedAccounts } = useConfirmedAccounts();
+
+  // Find user from confirmed accounts or mock users
+  const users = confirmedAccounts && confirmedAccounts.length > 0
+    ? confirmedAccounts.map(a => ({ userId: a.user_id, name: a.name }))
+    : MOCK_USERS;
+  const user = users.find((u) => u.userId === reservation.userId);
+
   const config = statusConfig[reservation.status];
   const StatusIcon = config.icon;
 
@@ -83,7 +94,7 @@ export function ReservationCard({
             </div>
           )}
         </div>
-        
+
         {showActions && (
           <div className="flex gap-2 pt-2">
             {reservation.status === 'active' && onPickUp && (

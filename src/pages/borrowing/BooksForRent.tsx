@@ -1,24 +1,53 @@
+import { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { BookCard } from '@/components/borrowing/BookCard';
 import { UserSelector } from '@/components/borrowing/UserSelector';
-import { useBorrowingStore } from '@/store/borrowingStore';
+import { useBooksForRent, useBorrowingActions, borrowingKeys, useActiveReservations } from '@/hooks/useBorrowing';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { BookOpen } from 'lucide-react';
-import {useNotificationAll} from "@/hooks/useNotification.tsx";
+import { useNotificationAll } from "@/hooks/useNotification.tsx";
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function BooksForRent() {
-  const { getBooksForRent, reserveBook, getCurrentUser } = useBorrowingStore();
-  const books = getBooksForRent();
-  const currentUser = getCurrentUser();
+  const queryClient = useQueryClient();
+  const { currentUser } = useAuth();
+  const { data: booksData, isLoading } = useBooksForRent();
+  const { data: activeReservations } = useActiveReservations();
+  const { reserveBook } = useBorrowingActions();
+  const [reservingBookId, setReservingBookId] = useState<string | null>(null);
 
-  const handleReserve = (bookId: string, title: string) => {
-    reserveBook(bookId, currentUser.userId);
-    toast.success(`Reserved "${title}" for ${currentUser.name}`);
+  // Refetch on notification
+  useNotificationAll(() => {
+    queryClient.invalidateQueries({ queryKey: borrowingKeys.all });
+  });
+
+  // Get reserved book IDs
+  const reservedBookIds = new Set((activeReservations || []).map(r => r.bookId));
+
+  // Transform books data
+  const books = (booksData || []).map(book => ({
+    bookId: book.bookId,
+    title: book.title,
+    description: book.description,
+    isAvailable: !reservedBookIds.has(book.bookId),
+  }));
+
+  const handleReserve = async (bookId: string, title: string) => {
+    if (!currentUser) {
+      toast.error('Please select a user first');
+      return;
+    }
+    setReservingBookId(bookId);
+    try {
+      await reserveBook(bookId, currentUser.userId);
+      toast.success(`Reserved "${title}" for ${currentUser.name}`);
+    } catch (error) {
+      toast.error('Failed to reserve book');
+    } finally {
+      setReservingBookId(null);
+    }
   };
-
-    useNotificationAll(()=>{
-        // refresh
-    })
 
   return (
     <Layout>
@@ -35,7 +64,9 @@ export default function BooksForRent() {
           <UserSelector />
         </div>
 
-        {books.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-8 text-muted-foreground">Loading...</div>
+        ) : books.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary mb-4">
               <BookOpen className="h-8 w-8 text-muted-foreground" />

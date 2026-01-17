@@ -17,44 +17,52 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { useRegistrationStore } from '@/store/registrationStore';
+import { useAuth } from '@/hooks/useAuth';
+import { useAccountActions } from '@/hooks/useAccount';
 import { toast } from 'sonner';
 import { User, LogOut, Trash2, AlertCircle } from 'lucide-react';
 
 export default function Account() {
   const navigate = useNavigate();
-  const { getCurrentAccount, updateAccount, deactivateAccount, logout, isLoggedIn } = useRegistrationStore();
-  
+  const { currentUser, isLoggedIn, logout } = useAuth();
+  const { updateAccount, deactivateAccount } = useAccountActions();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeactivating, setIsDeactivating] = useState(false);
 
-  const account = getCurrentAccount();
-
-  // Redirect if not logged in
-  if (!isLoggedIn() || !account) {
+  if (!isLoggedIn || !currentUser) {
     navigate('/auth');
     return null;
   }
 
   const handleStartEdit = () => {
-    setName(account.name);
-    setEmail(account.email);
+    setName(currentUser.name);
+    setEmail(currentUser.email);
     setIsEditing(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setError('');
-    
+
     if (!name.trim() || !email.trim()) {
       setError('Name and email are required');
       return;
     }
 
-    updateAccount(account.userId, email, name);
-    setIsEditing(false);
-    toast.success('Account updated successfully');
+    setIsSaving(true);
+    try {
+      await updateAccount(currentUser.userId, email, name);
+      setIsEditing(false);
+      toast.success('Account updated successfully');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to update account');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleLogout = () => {
@@ -63,10 +71,18 @@ export default function Account() {
     navigate('/auth');
   };
 
-  const handleDeactivate = () => {
-    deactivateAccount(account.userId);
-    toast.success('Account deactivated');
-    navigate('/auth');
+  const handleDeactivate = async () => {
+    setIsDeactivating(true);
+    try {
+      await deactivateAccount(currentUser.userId);
+      logout();
+      toast.success('Account deactivated');
+      navigate('/auth');
+    } catch (error) {
+      toast.error('Failed to deactivate account');
+    } finally {
+      setIsDeactivating(false);
+    }
   };
 
   return (
@@ -88,8 +104,8 @@ export default function Account() {
                 <User className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <CardTitle>{account.name}</CardTitle>
-                <CardDescription>{account.email}</CardDescription>
+                <CardTitle>{currentUser.name}</CardTitle>
+                <CardDescription>{currentUser.email}</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -120,7 +136,9 @@ export default function Account() {
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <Button onClick={handleSave}>Save Changes</Button>
+                  <Button onClick={handleSave} disabled={isSaving}>
+                    Save Changes
+                  </Button>
                   <Button variant="outline" onClick={() => setIsEditing(false)}>
                     Cancel
                   </Button>
@@ -130,11 +148,11 @@ export default function Account() {
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-muted-foreground">User ID</p>
-                  <p className="font-mono text-sm">{account.userId}</p>
+                  <p className="font-mono text-sm">{currentUser.userId}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Status</p>
-                  <p className="capitalize">{account.status}</p>
+                  <p className="capitalize">Confirmed</p>
                 </div>
                 <Button onClick={handleStartEdit}>Edit Profile</Button>
               </div>
@@ -149,10 +167,10 @@ export default function Account() {
                   <LogOut className="h-4 w-4" />
                   Logout
                 </Button>
-                
+
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" className="gap-2">
+                    <Button variant="destructive" className="gap-2" disabled={isDeactivating}>
                       <Trash2 className="h-4 w-4" />
                       Deactivate Account
                     </Button>
@@ -167,7 +185,10 @@ export default function Account() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDeactivate} className="bg-destructive text-destructive-foreground">
+                      <AlertDialogAction
+                        onClick={handleDeactivate}
+                        className="bg-destructive text-destructive-foreground"
+                      >
                         Deactivate
                       </AlertDialogAction>
                     </AlertDialogFooter>

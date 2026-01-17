@@ -5,22 +5,26 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useRegistrationStore } from '@/store/registrationStore';
+import { useAuth } from '@/hooks/useAuth';
+import { useAccountActions, useEmailsToConfirm, useConfirmedAccounts } from '@/hooks/useAccount';
 import { toast } from 'sonner';
 import { CheckCircle, AlertCircle, Mail } from 'lucide-react';
 
 export default function ConfirmAccount() {
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
-  const { confirmAccount, getAccount, getEmailsToConfirm } = useRegistrationStore();
-  
+  const { login } = useAuth();
+  const { confirmAccount } = useAccountActions();
+  const { data: emailToConfirmData } = useEmailsToConfirm(userId);
+  const { data: confirmedAccounts } = useConfirmedAccounts();
+
   const [token, setToken] = useState('');
   const [error, setError] = useState('');
+  const [isConfirming, setIsConfirming] = useState(false);
 
-  const account = userId ? getAccount(userId) : null;
-  const emailToConfirm = getEmailsToConfirm().find(e => e.userId === userId);
+  const isAlreadyConfirmed = confirmedAccounts?.some(a => a.user_id === userId);
 
-  if (!account) {
+  if (!userId) {
     return (
       <Layout>
         <div className="container flex items-center justify-center min-h-[calc(100vh-8rem)] py-8">
@@ -42,7 +46,7 @@ export default function ConfirmAccount() {
     );
   }
 
-  if (account.status === 'confirmed') {
+  if (isAlreadyConfirmed) {
     return (
       <Layout>
         <div className="container flex items-center justify-center min-h-[calc(100vh-8rem)] py-8">
@@ -67,7 +71,7 @@ export default function ConfirmAccount() {
     );
   }
 
-  const handleConfirm = (e: React.FormEvent) => {
+  const handleConfirm = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -76,15 +80,24 @@ export default function ConfirmAccount() {
       return;
     }
 
-    const result = confirmAccount(userId!, token.toUpperCase());
-    
-    if (result.success) {
+    setIsConfirming(true);
+    try {
+      const result = await confirmAccount(userId, emailToConfirmData?.email || '', token.toUpperCase());
+
+      login({
+        userId: result.userId,
+        email: result.email,
+        name: emailToConfirmData?.email || '',
+      });
+
       toast.success('Account confirmed!', {
         description: 'You are now logged in.',
       });
       navigate('/');
-    } else {
-      setError(result.error || 'Confirmation failed');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Confirmation failed');
+    } finally {
+      setIsConfirming(false);
     }
   };
 
@@ -98,15 +111,15 @@ export default function ConfirmAccount() {
             </div>
             <CardTitle className="font-serif text-2xl">Confirm Your Account</CardTitle>
             <CardDescription>
-              Enter the confirmation token sent to <strong>{account.email}</strong>
+              Enter the confirmation token sent to your email
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {emailToConfirm && (
+            {emailToConfirmData && (
               <div className="p-4 bg-secondary/50 rounded-lg border">
                 <p className="text-sm text-muted-foreground mb-1">Your confirmation token (demo):</p>
                 <code className="text-lg font-mono font-bold text-primary">
-                  {emailToConfirm.token}
+                  {emailToConfirmData.token}
                 </code>
               </div>
             )}
@@ -129,7 +142,7 @@ export default function ConfirmAccount() {
                   {error}
                 </div>
               )}
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={isConfirming}>
                 Confirm Account
               </Button>
             </form>

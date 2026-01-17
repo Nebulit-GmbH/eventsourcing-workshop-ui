@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { CatalogForm } from '@/components/catalog/CatalogForm';
-import { useCatalogStore } from '@/store/catalogStore';
+import { useCatalogActions } from '@/hooks/useCatalog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,15 +10,15 @@ import { toast } from 'sonner';
 
 const CreateEntry = () => {
   const navigate = useNavigate();
-  const createEntry = useCatalogStore((state) => state.createEntry);
+  const { createEntry } = useCatalogActions();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (data: { title: string; author: string; description: string }) => {
     setIsSubmitting(true);
     try {
-      const entry = createEntry(data);
+      const result = await createEntry(data);
       toast.success('Catalog entry created successfully');
-      navigate(`/entry/${entry.itemId}`);
+      navigate(`/entry/${result.itemId}`);
     } catch (error) {
       toast.error('Failed to create entry');
     } finally {
