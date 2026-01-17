@@ -11,6 +11,7 @@ const Publishing = () => {
 
   // Refetch on notification
   useNotificationAll(() => {
+      alert("CALLED")
     refetch();
   });
 
