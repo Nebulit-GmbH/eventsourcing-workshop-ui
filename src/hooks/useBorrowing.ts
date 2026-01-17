@@ -113,7 +113,7 @@ export function useBooksForRent(bookId?: string) {
 // Direct API call functions
 export function useBorrowingActions() {
   const reserveBook = async (bookId: string, userId: string) => {
-    const reservationId = Math.random().toString(36).substr(2, 9);
+    const reservationId = crypto.randomUUID();
     await borrowingApi.reserveBook(reservationId, {
       bookId,
       userId,

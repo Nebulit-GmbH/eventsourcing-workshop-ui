@@ -61,7 +61,7 @@ export function useCatalogEntry(id: string | undefined) {
 // Direct API call functions
 export function useCatalogActions() {
   const createEntry = async (data: { title: string; author: string; description: string }) => {
-    const itemId = Math.random().toString(36).substr(2, 9);
+    const itemId = crypto.randomUUID();
     await catalogApi.createEntry(itemId, {
       itemId,
       title: data.title,
