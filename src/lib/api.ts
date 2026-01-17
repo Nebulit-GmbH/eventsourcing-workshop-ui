@@ -358,12 +358,22 @@ export const catalogApi = {
       body: JSON.stringify(payload),
     }),
 
-  // Queries
-  getEntries: () =>
-    request<CatalogEntriesReadModel>('/catalogentries'),
+  // Queries (using direct database access via Vite middleware)
+  getEntries: async (): Promise<CatalogEntriesReadModel> => {
+    const response = await fetch('/api/catalogentries');
+    if (!response.ok) {
+      throw new ApiError(response.status, response.statusText);
+    }
+    return response.json();
+  },
 
-  getEntryDetails: (id: string) =>
-    request<CatalogEntryDetailsReadModel>(`/catalogentrydetails/${id}`),
+  getEntryDetails: async (id: string): Promise<CatalogEntryDetailsReadModel> => {
+    const response = await fetch(`/api/catalogentrydetails/${id}`);
+    if (!response.ok) {
+      throw new ApiError(response.status, response.statusText);
+    }
+    return response.json();
+  },
 
   getItemsToPublish: (id: string) =>
     request<ItemsToPublishReadModel>(`/itemstopublish/${id}`),
