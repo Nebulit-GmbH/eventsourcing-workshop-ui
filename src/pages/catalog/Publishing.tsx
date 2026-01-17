@@ -3,6 +3,7 @@ import { CatalogList } from '@/components/catalog/CatalogList';
 import { useCatalogStore } from '@/store/catalogStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, CheckCircle } from 'lucide-react';
+import {useNotificationAll} from "@/hooks/useNotification.tsx";
 
 const Publishing = () => {
   const getDraftEntries = useCatalogStore((state) => state.getDraftEntries);
@@ -10,6 +11,10 @@ const Publishing = () => {
 
   const draftEntries = getDraftEntries();
   const publishedEntries = getPublishedEntries();
+
+    useNotificationAll(()=>{
+        // refresh
+    })
 
   return (
     <Layout>

@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout/Layout';
 import { CatalogList } from '@/components/catalog/CatalogList';
 import { StatusTabs } from '@/components/catalog/StatusTabs';
 import { useCatalogStore } from '@/store/catalogStore';
+import {useNotificationAll} from "@/hooks/useNotification.tsx";
 
 const Index = () => {
   const [statusFilter, setStatusFilter] = useState('all');

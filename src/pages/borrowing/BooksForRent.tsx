@@ -4,6 +4,7 @@ import { UserSelector } from '@/components/borrowing/UserSelector';
 import { useBorrowingStore } from '@/store/borrowingStore';
 import { toast } from 'sonner';
 import { BookOpen } from 'lucide-react';
+import {useNotificationAll} from "@/hooks/useNotification.tsx";
 
 export default function BooksForRent() {
   const { getBooksForRent, reserveBook, getCurrentUser } = useBorrowingStore();
@@ -14,6 +15,10 @@ export default function BooksForRent() {
     reserveBook(bookId, currentUser.userId);
     toast.success(`Reserved "${title}" for ${currentUser.name}`);
   };
+
+    useNotificationAll(()=>{
+        // refresh
+    })
 
   return (
     <Layout>

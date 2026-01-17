@@ -4,6 +4,7 @@ import { useBorrowingStore } from '@/store/borrowingStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CalendarClock, BookOpen, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import {useNotificationAll} from "@/hooks/useNotification.tsx";
 
 export default function Reservations() {
   const { getAllReservations } = useBorrowingStore();
@@ -13,6 +14,10 @@ export default function Reservations() {
   const pickedUpReservations = allReservations.filter((r) => r.status === 'picked_up');
   const expiredReservations = allReservations.filter((r) => r.status === 'expired');
   const problemReservations = allReservations.filter((r) => r.status === 'lost' || r.status === 'damaged');
+
+    useNotificationAll(()=>{
+        // refresh
+    })
 
   const tabs = [
     { value: 'all', label: 'All', count: allReservations.length, icon: BookOpen },

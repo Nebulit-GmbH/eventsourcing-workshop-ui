@@ -4,6 +4,7 @@ import { UserSelector } from '@/components/borrowing/UserSelector';
 import { useBorrowingStore } from '@/store/borrowingStore';
 import { toast } from 'sonner';
 import { BookOpen } from 'lucide-react';
+import {useNotificationAll} from "@/hooks/useNotification.tsx";
 
 export default function CustomerBorrowings() {
   const { getAllReservations, markLost, markDamaged, getCurrentUser } = useBorrowingStore();
@@ -12,6 +13,10 @@ export default function CustomerBorrowings() {
   const borrowings = getAllReservations().filter(
     (r) => r.userId === currentUser.userId && r.status === 'picked_up'
   );
+
+    useNotificationAll(()=>{
+        // refresh
+    })
 
   const handleMarkLost = (reservationId: string, bookId: string) => {
     markLost(reservationId, bookId, currentUser.userId);

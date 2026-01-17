@@ -3,6 +3,7 @@ import { ReservationCard } from '@/components/borrowing/ReservationCard';
 import { useBorrowingStore } from '@/store/borrowingStore';
 import { toast } from 'sonner';
 import { Clock } from 'lucide-react';
+import {useNotificationAll} from "@/hooks/useNotification.tsx";
 
 export default function ActiveReservations() {
   const { getAllReservations, markPickedUp, getCurrentUser } = useBorrowingStore();
@@ -14,6 +15,10 @@ export default function ActiveReservations() {
     markPickedUp(reservationId, currentUser.userId);
     toast.success('Reservation marked as picked up');
   };
+
+  useNotificationAll(()=>{
+      // refresh
+  })
 
   return (
     <Layout>
