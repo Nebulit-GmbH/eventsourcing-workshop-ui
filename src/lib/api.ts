@@ -321,17 +321,16 @@ async function request<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  const userId = getCurrentUserId();
+  const userId = getCurrentUserId() ?? 'anonymous';
   
   const response = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...(userId ? { 'X-User-Id': userId } : {}),
+      'X-User-Id': userId,
       ...options.headers,
     },
   });
-
   if (!response.ok) {
     throw new ApiError(response.status, response.statusText);
   }
