@@ -299,35 +299,31 @@ export class ApiError extends Error {
 
 // ============= Session Helper =============
 
-const AUTH_STORAGE_KEY = 'auth_session';
+const SESSION_STORAGE_KEY = 'notification_session_id';
 
-function getCurrentUserId(): string | null {
-  try {
-    const stored = sessionStorage.getItem(AUTH_STORAGE_KEY);
-    if (stored) {
-      const session = JSON.parse(stored);
-      return session?.userId ?? null;
-    }
-  } catch {
-    // Ignore parsing errors
+function getOrCreateSessionId(): string {
+  let sessionId = sessionStorage.getItem(SESSION_STORAGE_KEY);
+
+  if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    sessionStorage.setItem(SESSION_STORAGE_KEY, sessionId);
   }
-  return null;
-}
 
-// ============= API Client =============
+  return sessionId;
+}
 
 async function request<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  const userId = getCurrentUserId() ?? 'anonymous';
+  const sessionId = getOrCreateSessionId();
   
   const response = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      'X-User-Id': userId,
+      'X-Session-Id': sessionId,
       ...options.headers,
     },
   });
