@@ -127,7 +127,7 @@ export interface ConnectionStatus {
 }
 
 // Type aliases for hooks
-export type CatalogEntry = { itemId: string; title: string; author?: string; description?: string };
+export type CatalogEntry = { itemId: string; title: string; author?: string; description?: string, createdDate: string };
 export type ConfirmedAccount = { user_id: string; email: string; name: string };
 export type ConfirmationMailToSend = { userId: string; email: string; name: string; notificationSent: string };
 export type EmailToConfirm = { userId: string; email: string; token: string };
@@ -140,6 +140,7 @@ export interface CatalogEntriesReadModel {
   data: Array<{
     itemId: string;
     title: string;
+    createdDate: string
   }>;
 }
 
@@ -149,6 +150,7 @@ export interface CatalogEntryDetailsReadModel {
     title: string;
     author: string;
     description: string;
+    createdDate: string
   };
 }
 
