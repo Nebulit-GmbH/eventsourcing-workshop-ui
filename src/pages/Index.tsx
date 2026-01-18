@@ -22,8 +22,7 @@ const Index = () => {
     author: '',
     description: '',
     status: 'draft' as const,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdDate: item.createdDate,
   }));
 
   const filteredEntries = entries.filter((entry) => {

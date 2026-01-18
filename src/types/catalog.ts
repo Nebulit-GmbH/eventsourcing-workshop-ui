@@ -4,8 +4,7 @@ export interface CatalogEntry {
   author: string;
   description: string;
   status: 'draft' | 'published' | 'archived';
-  createdAt: Date;
-  updatedAt: Date;
+  createdDate: string;
 }
 
 export interface CatalogEvent {

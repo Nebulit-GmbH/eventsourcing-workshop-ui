@@ -33,7 +33,7 @@ export function CatalogCard({ entry }: CatalogCardProps) {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5" />
-                  {format(new Date(entry.createdAt), 'MMM d, yyyy')}
+                  {entry.createdDate ? new Date(entry.createdDate).toLocaleDateString("en") : "-"}
                 </span>
               </div>
             </div>
