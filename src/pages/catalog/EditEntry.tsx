@@ -81,8 +81,7 @@ const EditEntry = () => {
                 author: entry.author,
                 description: entry.description,
                 status: 'draft',
-                createdAt: new Date(),
-                updatedAt: new Date(),
+                createdDate: entry.createdDate,
               }}
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}

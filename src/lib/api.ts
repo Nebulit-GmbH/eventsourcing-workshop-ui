@@ -297,6 +297,23 @@ export class ApiError extends Error {
   }
 }
 
+// ============= Session Helper =============
+
+const AUTH_STORAGE_KEY = 'auth_session';
+
+function getCurrentUserId(): string | null {
+  try {
+    const stored = sessionStorage.getItem(AUTH_STORAGE_KEY);
+    if (stored) {
+      const session = JSON.parse(stored);
+      return session?.userId ?? null;
+    }
+  } catch {
+    // Ignore parsing errors
+  }
+  return null;
+}
+
 // ============= API Client =============
 
 async function request<T>(
@@ -304,10 +321,13 @@ async function request<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
+  const userId = getCurrentUserId();
+  
   const response = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...(userId ? { 'X-User-Id': userId } : {}),
       ...options.headers,
     },
   });
