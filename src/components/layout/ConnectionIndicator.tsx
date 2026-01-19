@@ -1,9 +1,27 @@
+import { useEffect, useState } from 'react';
 import { Wifi, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useNotificationStatus } from '@/hooks/useNotification';
+
+const API_BASE_URL = 'http://localhost:8080';
 
 export function ConnectionIndicator() {
-  const { isConnected } = useNotificationStatus();
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const response = await fetch(API_BASE_URL, { method: 'OPTIONS' });
+        setIsConnected(response.ok);
+      } catch {
+        setIsConnected(false);
+      }
+    };
+
+    checkConnection();
+    const interval = setInterval(checkConnection, 10000); // Check every 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div
