@@ -18,6 +18,7 @@ import { Loader2 } from 'lucide-react';
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title is too long'),
   author: z.string().min(1, 'Author is required').max(100, 'Author name is too long'),
+  isbn: z.string().min(1, 'ISBN is required').max(20, 'ISBN is too long'),
   description: z.string().min(1, 'Description is required').max(2000, 'Description is too long'),
 });
 
@@ -35,6 +36,7 @@ export function CatalogForm({ entry, onSubmit, isSubmitting }: CatalogFormProps)
     defaultValues: {
       title: entry?.title ?? '',
       author: entry?.author ?? '',
+      isbn: entry?.isbn ?? '',
       description: entry?.description ?? '',
     },
   });
@@ -69,6 +71,24 @@ export function CatalogForm({ entry, onSubmit, isSubmitting }: CatalogFormProps)
               <FormControl>
                 <Input
                   placeholder="Enter the author name"
+                  className="h-11"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="isbn"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-foreground">ISBN</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Enter the ISBN"
                   className="h-11"
                   {...field}
                 />

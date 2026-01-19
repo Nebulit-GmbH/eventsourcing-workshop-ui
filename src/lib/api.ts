@@ -9,6 +9,7 @@ export interface CreateCatalogEntryPayload {
   itemId: string;
   title: string;
   author: string;
+  isbn: string;
   description: string;
 }
 
@@ -16,6 +17,7 @@ export interface UpdateCatalogEntryPayload {
   itemId: string;
   title: string;
   author: string;
+  isbn: string;
   description: string;
 }
 
@@ -31,6 +33,7 @@ export interface ExportItemPayload {
   itemId: string;
   title: string;
   author: string;
+  isbn: string;
   description: string;
 }
 
@@ -127,7 +130,7 @@ export interface ConnectionStatus {
 }
 
 // Type aliases for hooks
-export type CatalogEntry = { itemId: string; title: string; author?: string; description?: string, createdDate: string };
+export type CatalogEntry = { itemId: string; title: string; author?: string; isbn?: string; description?: string, createdDate: string };
 export type ConfirmedAccount = { user_id: string; email: string; name: string };
 export type ConfirmationMailToSend = { userId: string; email: string; name: string; notificationSent: string };
 export type EmailToConfirm = { userId: string; email: string; token: string };
@@ -140,6 +143,7 @@ export interface CatalogEntriesReadModel {
   data: Array<{
     itemId: string;
     title: string;
+    isbn?: string;
     createdDate: string
   }>;
 }
@@ -149,6 +153,7 @@ export interface CatalogEntryDetailsReadModel {
     itemId: string;
     title: string;
     author: string;
+    isbn: string;
     description: string;
     createdDate: string
   };
@@ -166,6 +171,7 @@ export interface ItemDetailsForPublicationReadModel {
     itemId: string;
     title: string;
     author: string;
+    isbn: string;
     description: string;
   };
 }

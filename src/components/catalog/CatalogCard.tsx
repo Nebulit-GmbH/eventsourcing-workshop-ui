@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { CatalogEntry } from '@/types/catalog';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ArrowRight, User, Calendar } from 'lucide-react';
+import { ArrowRight, User, Calendar, BookOpen } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -26,10 +26,14 @@ export function CatalogCard({ entry }: CatalogCardProps) {
               <h3 className="font-serif text-xl font-semibold text-foreground group-hover:text-accent transition-colors line-clamp-1">
                 {entry.title}
               </h3>
-              <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <User className="h-3.5 w-3.5" />
                   {entry.author}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  {entry.isbn || '-'}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5" />

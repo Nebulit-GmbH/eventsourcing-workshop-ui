@@ -60,22 +60,24 @@ export function useCatalogEntry(id: string | undefined) {
 
 // Direct API call functions
 export function useCatalogActions() {
-  const createEntry = async (data: { title: string; author: string; description: string }) => {
+  const createEntry = async (data: { title: string; author: string; isbn: string; description: string }) => {
     const itemId = crypto.randomUUID();
     await catalogApi.createEntry(itemId, {
       itemId,
       title: data.title,
       author: data.author,
+      isbn: data.isbn,
       description: data.description,
     });
     return { itemId, ...data };
   };
 
-  const updateEntry = async (itemId: string, data: { title: string; author: string; description: string }) => {
+  const updateEntry = async (itemId: string, data: { title: string; author: string; isbn: string; description: string }) => {
     await catalogApi.updateEntry(itemId, {
       itemId,
       title: data.title,
       author: data.author,
+      isbn: data.isbn,
       description: data.description,
     });
   };
