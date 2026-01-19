@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ArrowLeft, Edit, Archive, Send, User, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft, Edit, Archive, Send, User, Calendar, Clock, BookOpen } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -119,6 +119,10 @@ const EntryDetails = () => {
               <span className="flex items-center gap-1.5">
                 <User className="h-4 w-4" />
                 {entry.author}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <BookOpen className="h-4 w-4" />
+                ISBN: {entry.isbn || '-'}
               </span>
               <span className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4" />

@@ -13,7 +13,7 @@ const CreateEntry = () => {
   const { createEntry } = useCatalogActions();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (data: { title: string; author: string; description: string }) => {
+  const handleSubmit = async (data: { title: string; author: string; isbn: string; description: string }) => {
     setIsSubmitting(true);
     try {
       const result = await createEntry(data);

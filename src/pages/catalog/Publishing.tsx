@@ -20,6 +20,7 @@ const Publishing = () => {
         itemId: item.itemId,
         title: item.title,
         author: '',
+        isbn: item.isbn || '',
         description: '',
         status: 'draft' as const,
         createdDate: ''

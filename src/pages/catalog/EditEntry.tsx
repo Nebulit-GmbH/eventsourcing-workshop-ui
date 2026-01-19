@@ -41,7 +41,7 @@ const EditEntry = () => {
     );
   }
 
-  const handleSubmit = async (data: { title: string; author: string; description: string }) => {
+  const handleSubmit = async (data: { title: string; author: string; isbn: string; description: string }) => {
     setIsSubmitting(true);
     try {
       await updateEntry(entry.itemId, data);
@@ -79,6 +79,7 @@ const EditEntry = () => {
                 itemId: entry.itemId,
                 title: entry.title,
                 author: entry.author,
+                isbn: entry.isbn,
                 description: entry.description,
                 status: 'draft',
                 createdDate: entry.createdDate,
