@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Book, Plus, Send, BookOpen, CalendarClock, ClipboardList, User, Users, LogIn, LogOut } from 'lucide-react';
+import { Book, Plus, Send, BookOpen, CalendarClock, ClipboardList, User, Users, LogIn, LogOut, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
@@ -142,6 +142,19 @@ export function Header() {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <Link
+              to="/api-info"
+              className={cn(
+                'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                location.pathname === '/api-info'
+                  ? 'bg-secondary text-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+              )}
+            >
+              <Info className="h-4 w-4" />
+              API Info
+            </Link>
           </nav>
         </div>
 

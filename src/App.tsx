@@ -15,6 +15,7 @@ import Auth from "./pages/account/Auth";
 import ConfirmAccount from "./pages/account/ConfirmAccount";
 import Account from "./pages/account/Account";
 import ConfirmedAccounts from "./pages/account/ConfirmedAccounts";
+import ApiEndpoints from "./pages/info/ApiEndpoints";
 import NotFound from "./pages/NotFound";
 import { NotificationProvider, useNotificationAll } from "./hooks/useNotification";
 import { AuthProvider } from "./hooks/useAuth";
@@ -58,6 +59,9 @@ const App = () => (
           <Route path="/confirm/:userId" element={<ConfirmAccount />} />
           <Route path="/account" element={<Account />} />
           <Route path="/accounts" element={<ConfirmedAccounts />} />
+
+          {/* Info */}
+          <Route path="/api-info" element={<ApiEndpoints />} />
 
           <Route path="*" element={<NotFound />} />
           </Routes>
