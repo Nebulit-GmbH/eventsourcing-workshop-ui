@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useCallback, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useCallback, ReactNode } from 'react';
 import { useNotificationSubscription, NotificationEvent } from './useNotificationSubscription';
 
 type NotificationCallback = (data: unknown) => void;
@@ -19,7 +19,6 @@ interface NotificationProviderProps {
 export function NotificationProvider({ children }: NotificationProviderProps) {
   const subscribersRef = useRef<Map<string, Set<NotificationCallback>>>(new Map());
   const allSubscribersRef = useRef<Set<(event: NotificationEvent) => void>>(new Set());
-  const [isConnected, setIsConnected] = useState(false);
 
   const handleMessage = useCallback((event: NotificationEvent) => {
     // Notify all-event subscribers
@@ -60,10 +59,8 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     }
   }, []);
 
-  const { sessionId } = useNotificationSubscription({
+  const { sessionId, isConnected } = useNotificationSubscription({
     onMessage: handleMessage,
-    onOpen: () => setIsConnected(true),
-    onError: () => setIsConnected(false),
   });
 
   const subscribe = useCallback((type: string, callback: NotificationCallback) => {
