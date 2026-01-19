@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Wifi, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const API_BASE_URL = 'http://localhost:8080';
+const HEALTH_CHECK_URL = 'http://localhost:8080/actuator/health';
 
 export function ConnectionIndicator() {
   const [isConnected, setIsConnected] = useState(false);
@@ -10,7 +10,7 @@ export function ConnectionIndicator() {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        const response = await fetch(API_BASE_URL, { method: 'OPTIONS' });
+        const response = await fetch(HEALTH_CHECK_URL, { method: 'GET' });
         setIsConnected(response.ok);
       } catch {
         setIsConnected(false);
