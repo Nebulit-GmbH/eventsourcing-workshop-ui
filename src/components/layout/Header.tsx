@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { ConnectionIndicator } from './ConnectionIndicator';
 
 const catalogNavItems = [
   { href: '/', label: 'Catalog', icon: Book },
@@ -144,7 +145,8 @@ export function Header() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <ConnectionIndicator />
           <Link to="/create">
             <Button variant="outline" className="gap-2">
               <Plus className="h-4 w-4" />
